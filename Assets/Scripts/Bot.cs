@@ -8,10 +8,12 @@ public class Bot : MonoBehaviour {
     public GameObject target;
 
     NavMeshAgent agent;
+    Drive ds;
 
     void Start() {
 
         agent = GetComponent<NavMeshAgent>();
+        ds = target.GetComponent<Drive>();
     }
 
     void Seek(Vector3 location) {
@@ -30,9 +32,9 @@ public class Bot : MonoBehaviour {
         Vector3 targetDir = target.transform.position - transform.position;
         float relativeHeading = Vector3.Angle(transform.forward, transform.TransformVector(target.transform.forward));
         float toTarget = Vector3.Angle(transform.forward, transform.TransformVector(targetDir));
-        float curSpeed = target.GetComponent<Drive>().currentSpeed;
 
-        if ((toTarget > 90.0f && relativeHeading < 20.0f) || curSpeed < 0.01f) {
+
+        if ((toTarget > 90.0f && relativeHeading < 20.0f) || ds.currentSpeed < 0.01f) {
 
             // Debug.Log("SEEKING");
             Seek(target.transform.position);
@@ -40,14 +42,22 @@ public class Bot : MonoBehaviour {
         }
 
         // Debug.Log("LOOKING AHEAD");
-        float lookAhead = targetDir.magnitude / (agent.speed + curSpeed);
+        float lookAhead = targetDir.magnitude / (agent.speed + ds.currentSpeed);
         Seek(target.transform.position + target.transform.forward * lookAhead);
+    }
+
+    void Evade() {
+
+        Vector3 targetDir = target.transform.position - transform.position;
+        float lookAhead = targetDir.magnitude / (agent.speed + ds.currentSpeed);
+        Flee(target.transform.position + target.transform.forward * lookAhead);
     }
 
     void Update() {
 
         // Seek(target.transform.position);
         // Flee(target.transform.position);
-        Pursue();
+        // Pursue();
+        Evade();
     }
 }
